@@ -1,0 +1,42 @@
+using System;
+using System.Net.Sockets;
+using System.Text;
+
+class ZebraNetworkPrint
+{
+    static void Main()
+    {
+        string printerIP = "192.168.1.100"; // apna Zebra printer IP
+        int port = 9100;
+
+        string sn1 = "123456";
+        string sn2 = "654321";
+
+        string zpl = $@"
+^XA
+^FO50,50^BY2
+^BCN,100,Y,N,N
+^FD{sn1}^FS
+^FO50,200^BY2
+^BCN,100,Y,N,N
+^FD{sn2}^FS
+^XZ";
+
+        try
+        {
+            using (TcpClient client = new TcpClient())
+            {
+                client.Connect(printerIP, port);
+                byte[] data = Encoding.ASCII.GetBytes(zpl);
+                NetworkStream stream = client.GetStream();
+                stream.Write(data, 0, data.Length);
+                stream.Close();
+            }
+            Console.WriteLine("Print sent to Zebra via network!");
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+        }
+    }
+}
